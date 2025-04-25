@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager 
+spec:
+  replicas: 2 
+  selector:
+    matchLabels:
+      app: task-manager 
+  template: 
+    metadata:
+      labels:
+        app: task-manager 
+    spec:
+      containers:
+      - name: task-manager 
+        image: wedew365/task-manager:v1.0.0 
+        ports:
+        - containerPort: 8080 
+        env:
+        # --- Database Configuration ---
+        - name: DB_HOST
+          value: postgres 
+        - name: DB_USER
+          value: postgres # Database username 
+        - name: DB_PASSWORD # Database password sourced from the Secret
+          valueFrom:
+            secretKeyRef:
+              name: postgres-creds
+              key: db-password  
+        - name: DB_NAME
+          value: taskdb 
+        - name: DB_PORT
+          value: "5432" # Port for the database connection
+        # --- Application Port ---
+        - name: PORT
+          value: "8080" # Port the Go application should listen on
+
+        # --- Health Checks ---
+        readinessProbe: 
+          httpGet:
+            path: /api/tasks 
+            port: 8080
+          initialDelaySeconds: 10 
+          periodSeconds: 10   
+          failureThreshold: 3 
+        livenessProbe: 
+          httpGet:
+            path: /api/tasks 
+            port: 8080
+          initialDelaySeconds: 15 
+          periodSeconds: 20  
+          failureThreshold: 3 

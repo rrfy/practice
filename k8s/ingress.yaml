@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task-manager-ingress-tls 
+  namespace: default 
+  annotations:
+    ingress.alb.yc.io/subnets: e2l9o4pf49qo20nl1gqn
+    ingress.alb.yc.io/external-ipv4-address: auto
+    ingress.alb.yc.io/group-name: task-manager-tls-group
+spec:
+  tls:
+    - hosts:
+        - task-manager.yc.lab
+      secretName: yc-certmgr-cert-id-fpqsfoel3hkta9s2jmqj
+  rules:
+    - host: task-manager.yc.lab
+      http:
+        paths:
+          - path: /
+            pathType: Prefix 
+            backend:
+              service:
+                name: task-manager
+                port:
+                  number: 80
